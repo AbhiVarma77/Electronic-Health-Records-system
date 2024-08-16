@@ -1,0 +1,25 @@
+.wrp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.button {
+  border-radius: 8px;
+  background: #dc3444;
+  color: white;
+  text-transform: uppercase;
+  font-weight: 800;
+  border: none;
+  margin-top: 24px;
+  padding: 16px;
+  font-size: 16px;
+  letter-spacing: 4px;
+}
+button:hover {
+  background: #98272d;
+}
+button:active {
+  transition: 0.3s all;
+  border: 1px solid transparent;
+  opacity: 0.8;
+}

@@ -1,0 +1,22 @@
+.wrp {
+  display: flex;
+  margin-left: auto;
+  padding: 0px 24px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+}
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 8px 0;
+}
+.select {
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid grey;
+  padding: 12px;
+  margin-bottom: 10px;
+  font-size: 16px;
+}

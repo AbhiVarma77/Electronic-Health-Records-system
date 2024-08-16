@@ -1,0 +1,39 @@
+:root {
+  --secondary-color: #bf1650;
+  --error-color: red;
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: black;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+.container {
+  margin: auto;
+  max-width: 600px;
+  width: 100vw;
+}
+
+.navbar-custom {
+  border-bottom: 3px solid #cf2e2e;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
+}
+
+.navbar-h1 {
+  font-size: 1.5em;
+}
+
+.navbar-content {
+  align-items: center;
+}
