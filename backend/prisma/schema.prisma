@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id           Int            @id @default(autoincrement())
+  qrId         String?         @unique
+  name         String
+  phone        String
+  address      String
+  dateOfBirth  DateTime
+  gender       String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Consultation Consultation[]
+  Visit        Visit[]
+  bookNumber   String         @unique
+  notes        String?
+
+  @@unique([name, phone])
+}
+
+model Speciality {
+  id           Int            @id @default(autoincrement())
+  name         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Doctor       Doctor[]
+  Consultation Consultation[]
+}
+
+model Doctor {
+  id           Int            @id @default(autoincrement())
+  name         String
+  phone        String         @unique
+  address      String
+  hospital     String
+  specialityId Int
+  speciality   Speciality     @relation(fields: [specialityId], references: [id])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Consultation Consultation[]
+}
+
+model MedicalCampPlace {
+  id          Int           @id @default(autoincrement())
+  name        String
+  address     String
+  shortName   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  MedicalCamp MedicalCamp[]
+  bookNumber  Int           @default(0)
+}
+
+model MedicalCamp {
+  id                 Int              @id @default(autoincrement())
+  medicalCampPlaceId Int
+  date               DateTime
+  token              Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  Consultation       Consultation[]
+  Visit              Visit[]
+  medicalCampPlace   MedicalCampPlace @relation(fields: [medicalCampPlaceId], references: [id])
+  active             Boolean          @default(true)
+
+  @@unique([medicalCampPlaceId, date])
+}
+
+model Staff {
+  id             Int            @id @default(autoincrement())
+  name           String
+  email          String         @unique
+  phone          String         @unique
+  address        String?
+  hashedPassword String
+  salt           String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  Visit          Visit[]
+  Prescription   Prescription[]
+}
+
+model Visit {
+  id            Int            @id @default(autoincrement())
+  staffId       Int
+  patientId     Int
+  medicalCampId Int
+  token         Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  staff         Staff          @relation(fields: [staffId], references: [id])
+  patient       Patient        @relation(fields: [patientId], references: [id])
+  medicalCamp   MedicalCamp    @relation(fields: [medicalCampId], references: [id])
+  Consultation  Consultation[]
+
+  // Vitals
+  heartRate     Int?
+  bloodPressure String?
+  temperature   Float?
+  weight        Float?
+  height        Int?
+
+    //progress updates
+    registrationDone DateTime? @default(now())
+    vitalsDone DateTime?
+    tiragingDone DateTime?
+    consultationDocumentingDone DateTime?
+    medicinesCheckDone DateTime?
+    medicinesDispatchDone DateTime?
+    patientCouncellingDone DateTime?
+    sampleCollectionDone DateTime?
+    refreshmentsDone DateTime? 
+
+  @@unique([patientId, medicalCampId])
+}
+
+model Consultation {
+  id           Int        @id @default(autoincrement())
+  visitId      Int
+  specialityId Int
+  doctorId     Int?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  speciality   Speciality @relation(fields: [specialityId], references: [id])
+  doctor       Doctor?    @relation(fields: [doctorId], references: [id])
+  visit        Visit      @relation(fields: [visitId], references: [id])
+
+  // Doctor Consultation
+  observations     String?
+  symptoms         String?
+  Prescription     Prescription[]
+  Patient          Patient?           @relation(fields: [patientId], references: [id])
+  patientId        Int?
+  MedicalCamp      MedicalCamp?       @relation(fields: [medicalCampId], references: [id])
+  medicalCampId    Int?
+  TestPrescription TestPrescription[]
+  Attachment       Attachment[]
+
+  @@unique([visitId, specialityId])
+}
+
+model Medicine {
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String?
+  category     String?
+  stock         Int?
+  expiryDate    DateTime?
+  Formulation   String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Prescription Prescription[]
+}
+
+enum PrescriptionQuantityUnit {
+  TABLET
+  STRIP
+  PIECE
+}
+
+model Prescription {
+  id             Int          @id @default(autoincrement())
+  consultationId Int
+  medicineId     Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+  medicine       Medicine     @relation(fields: [medicineId], references: [id])
+
+  usage        String
+  quantity     Int
+  quantityUnit PrescriptionQuantityUnit
+
+  givenQuantity     Int?
+  givenQuantityUnit PrescriptionQuantityUnit?
+
+    verified    Boolean @default(false)
+  staffId Int?
+  staff   Staff? @relation(fields: [staffId], references: [id])
+
+  @@unique([consultationId, medicineId])
+}
+
+model Test {
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  TestPrescription TestPrescription[]
+}
+
+model TestPrescription {
+  id             Int          @id @default(autoincrement())
+  consultationId Int
+  testId         Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+  test           Test         @relation(fields: [testId], references: [id])
+  sampleStatus   Boolean      @default(false)
+  reportStatus   Boolean      @default(false)
+  Attachment     Attachment[]
+
+  @@unique([consultationId, testId])
+}
+
+model Attachment {
+  id                 Int               @id @default(autoincrement())
+  consultationId     Int
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  consultation       Consultation      @relation(fields: [consultationId], references: [id])
+  url                String
+  type               String
+  name               String
+  testPrescriptionId Int?
+  testPrescription   TestPrescription? @relation(fields: [testPrescriptionId], references: [id])
+}
